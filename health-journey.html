@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ابدأ رحلتك الصحية - WellCare</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        :root {
+            --primary: #2E8B57;
+            --primary-light: #3CB371;
+            --secondary: #4A90E2;
+            --accent: #FF6B6B;
+            --light: #F8F9FA;
+            --dark: #343A40;
+            --gray: #6C757D;
+            --white: #FFFFFF;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* متغيرات السمة الغامقة */
+        :root.dark-theme {
+            --primary: #1a5332;
+            --primary-light: #2a7a4a;
+            --secondary: #2c5b9e;
+            --accent: #c44d4d;
+            --light: #1e1e1e;
+            --dark: #f8f9fa;
+            --gray: #a0a0a0;
+            --white: #121212;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        body.dark-theme {
+            background-color: #0f0f0f;
+        }
+
+        /* تنسيق الهيدر */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* شعار WellCare على اليسار */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--light);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: #FFD700;
+        }
+
+        /* منطقة المستخدم على اليمين */
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .welcome-msg {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .user-profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--white);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* نافذة السمة */
+        .theme-modal {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            width: 250px;
+            z-index: 1001;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .theme-modal.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .theme-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .theme-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .theme-option:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-theme .theme-option:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .theme-option.active {
+            border-color: var(--primary);
+            background-color: rgba(46, 139, 87, 0.1);
+        }
+
+        .dark-theme .theme-option.active {
+            background-color: rgba(26, 83, 50, 0.3);
+        }
+
+        .theme-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+        }
+
+        .color-theme .theme-preview {
+            background: linear-gradient(135deg, #FF6B6B, #4A90E2, #2E8B57);
+        }
+
+        .dark-theme-option .theme-preview {
+            background: linear-gradient(135deg, #c44d4d, #2c5b9e, #1a5332);
+        }
+
+        .theme-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+
+        /* المحتوى الرئيسي */
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* قسم الترحيب - خلفية ملونة بدلاً من صورة */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path fill="rgba(255,255,255,0.1)" d="M0,0 L100,0 L100,100 Z"></path></svg>');
+            background-size: cover;
+        }
+
+        .welcome-section h2 {
+            font-size: 2.5rem;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-message {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sub-message {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* حاوية زر التراجع والعنوان */
+        .welcome-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        /* زر التراجع داخل المحتوى */
+        .content-back-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .content-back-btn:hover {
+            background-color: var(--primary-light);
+            transform: translateX(-5px);
+        }
+
+        /* العناوين الجانبية */
+        .section-title {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 3rem 0 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--primary-light);
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            margin-left: 1rem;
+        }
+
+        /* بطاقات الأمراض */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .disease-card,
+        .diet-card {
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            text-align: center;
+            border-top: 5px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .disease-card:hover,
+        .diet-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-theme .disease-card:hover,
+        .dark-theme .diet-card:hover {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .disease-card::before,
+        .diet-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+        }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .card-icon i {
+            font-size: 2rem;
+            color: var(--white);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .card-description {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .card-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .card-btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+
+        /* أنظمة غذائية خاصة */
+        .diet-section .cards-container {
+            margin-bottom: 2rem;
+        }
+
+        .diet-card {
+            border-top: 5px solid var(--secondary);
+        }
+
+        /* تذييل الصفحة */
+        footer {
+            background-color: var(--dark);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            margin-top: auto;
+            transition: var(--transition);
+        }
+
+        .dark-theme footer {
+            background-color: #1a1a1a;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--white);
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--primary-light);
+        }
+
+        .copyright {
+            font-size: 1rem;
+            color: #adb5bd;
+            padding-top: 1rem;
+            border-top: 1px solid #495057;
+            width: 100%;
+        }
+
+        .dark-theme .copyright {
+            border-top: 1px solid #333;
+        }
+
+        /* التجاوب مع الشاشات الصغيرة */
+        @media (max-width: 992px) {
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .welcome-section h2 {
+                font-size: 2rem;
+            }
+
+            .welcome-message,
+            .sub-message {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 1.7rem;
+            }
+
+            .welcome-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .content-back-btn {
+                align-self: flex-start;
+            }
+
+            .welcome-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .content-back-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- الهيدر -->
+    <header>
+        <div class="header-container">
+            <!-- شعار WellCare على اليسار -->
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <h1>Well<span>Care</span></h1>
+            </div>
+
+            <!-- منطقة المستخدم على اليمين -->
+            <div class="user-area">
+                <div class="user-profile">
+                    <div class="profile-img" id="profile-img">
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+                            alt="صورة الملف الشخصي">
+                    </div>
+                    <div class="welcome-msg">مرحباً، user!</div>
+
+                    <!-- نافذة اختيار السمة -->
+                    <div class="theme-modal" id="theme-modal">
+                        <h3 class="theme-title">اختر سمة الموقع</h3>
+                        <div class="theme-options">
+                            <div class="theme-option color-theme active" id="color-theme">
+                                <div class="theme-preview"></div>
+                                <div class="theme-name">اللونية الزاهية</div>
+                            </div>
+                            <div class="theme-option dark-theme-option" id="dark-theme">
+                                <div class="theme-preview"></div>
+                                <div class="theme-name">اللونية الغامقة</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main>
+        <!-- زر التراجع والعنوان -->
+        <div class="welcome-header">
+            <button class="content-back-btn" title="العودة للصفحة الرئيسية" onclick="window.location.href='index.php'">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h2 class="welcome-title">رحلتك الصحية تبدأ هنا</h2>
+        </div>
+
+        <!-- قسم الترحيب -->
+        <section class="welcome-section">
+            <p class="welcome-message">في موقعنا نقدم لك معلومات موثوقة عن أكثر الأمراض شيوعاً وطرق الوقاية منها</p>
+            <p class="sub-message">بالإضافة إلى أنظمة غذائية تساعدك على الحفاظ على صحتك</p>
+        </section>
+
+        <!-- قسم الأمراض الشائعة -->
+        <h2 class="section-title">الأمراض الشائعة وطرق الوقاية</h2>
+        <div class="cards-container">
+            <!-- السكري -->
+            <div class="disease-card">
+                <div class="card-icon">
+                    <i class="fas fa-syringe"></i>
+                </div>
+                <h3 class="card-title">السكري</h3>
+                <p class="card-description">مرض مزمن يؤثر على قدرة الجسم على معالجة الجلوكوز. يرتبط بمضاعفات خطيرة إذا
+                    لم يتم السيطرة عليه.</p>
+                <a href="content.php?slug=diabetes" class="card-btn cta-button">
+                    تعرف على طرق الوقاية</a>
+            </div>
+
+            <!-- ارتفاع ضغط الدم -->
+            <div class="disease-card">
+                <div class="card-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h3 class="card-title">ارتفاع ضغط الدم</h3>
+                <p class="card-description">حالة شائعة حيث تكون قوة دفع الدم ضد جدران الشرايين مرتفعة باستمرار، مما يزيد
+                    من خطر الإصابة بأمراض القلب.</p>
+                <a href="content.php?slug=hypertension" class="card-btn cta-button">
+                    تعرف على طرق الوقاية</a>
+            </div>
+
+            <!-- أمراض القلب -->
+            <div class="disease-card">
+                <div class="card-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3 class="card-title">أمراض القلب</h3>
+                <p class="card-description">تشمل مجموعة من الحالات التي تؤثر على القلب، مثل أمراض الشرايين التاجية وعدم
+                    انتظام ضربات القلب.</p>
+                <a href="content.php?slug=heart-disease" class="card-btn cta-button">
+                    تعرف على طرق الوقاية</a>
+            </div>
+
+            <!-- السمنة -->
+            <div class="disease-card">
+                <div class="card-icon">
+                    <i class="fas fa-weight"></i>
+                </div>
+                <h3 class="card-title">السمنة</h3>
+                <p class="card-description">تراكم الدهون الزائدة في الجسم مما يزيد من خطر الإصابة بمشكلات صحية مثل
+                    السكري وأمراض القلب.</p>
+                <a href="content.php?slug=obesity" class="card-btn cta-button">
+                    تعرف على طرق الوقاية</a>
+            </div>
+
+            <!-- أمراض الجهاز التنفسي -->
+            <div class="disease-card">
+                <div class="card-icon">
+                    <i class="fas fa-lungs"></i>
+                </div>
+                <h3 class="card-title">أمراض الجهاز التنفسي</h3>
+                <p class="card-description">تشمل الربو والتهاب الشعب الهوائية المزمن وانتفاخ الرئة، وتؤثر على قدرة الشخص
+                    على التنفس.</p>
+                <a href="content.php?slug=respiratory-diseases" class="card-btn cta-button">
+                    تعرف على طرق الوقاية</a>
+            </div>
+        </div>
+
+        <!-- قسم الأنظمة الغذائية -->
+        <h2 class="section-title">أنظمة غذائية للحفاظ على الصحة</h2>
+        <div class="cards-container diet-section">
+            <!-- نظام الكيتو -->
+            <div class="diet-card">
+                <div class="card-icon">
+                    <i class="fas fa-bacon"></i>
+                </div>
+                <h3 class="card-title">نظام الكيتو</h3>
+                <p class="card-description">نظام غذائي منخفض الكربوهيدرات وعالي الدهون يساعد الجسم على حرق الدهون للحصول
+                    على الطاقة بدلاً من الجلوكوز.</p>
+                <a href="content.php?slug=keto" class="card-btn cta-button">
+                    تعرف على النظام</a>
+            </div>
+
+            <!-- النظام المتوسطي -->
+            <div class="diet-card">
+                <div class="card-icon">
+                    <i class="fas fa-fish"></i>
+                </div>
+                <h3 class="card-title">النظام المتوسطي</h3>
+                <p class="card-description">يعتمد على الأطعمة التقليدية التي يتناولها سكان دول البحر المتوسط، غني
+                    بالفواكه والخضروات والحبوب الكاملة.</p>
+                <a href="content.php?slug=mediterranean" class="card-btn cta-button">
+                    تعرف على النظام</a>
+            </div>
+
+            <!-- نظام DASH -->
+            <div class="diet-card">
+                <div class="card-icon">
+                    <i class="fas fa-apple-alt"></i>
+                </div>
+                <h3 class="card-title">نظام DASH</h3>
+                <p class="card-description">صمم خصيصاً لخفض ضغط الدم، يركز على الفواكه والخضروات والحبوب الكاملة
+                    والبروتينات قليلة الدسم.</p>
+                <a href="content.php?slug=dash" class="card-btn cta-button">
+                    تعرف على النظام</a>
+            </div>
+
+            <!-- نظام نباتي -->
+            <div class="diet-card">
+                <div class="card-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3 class="card-title">نظام نباتي</h3>
+                <p class="card-description">يعتمد على الأطعمة النباتية فقط، مع استبعاد جميع المنتجات الحيوانية بما في
+                    ذلك اللحوم والألبان والبيض.</p>
+                <a href="content.php?slug=vegan" class="card-btn cta-button">
+                    تعرف على النظام</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- الفوتر -->
+    <footer>
+        <div class="footer-content">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <h2>Well<span>Care</span></h2>
+            </div>
+
+            <p>منصة الرعاية الصحية الشاملة لكل أفراد الأسرة</p>
+
+            <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+
+            <div class="copyright">
+                &copy; 2023 WellCare. جميع الحقوق محفوظة. | تم التطوير بدقة وحب لخدمة صحتك
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // العناصر الأساسية
+        const profileImg = document.getElementById('profile-img');
+        const themeModal = document.getElementById('theme-modal');
+        const colorTheme = document.getElementById('color-theme');
+        const darkTheme = document.getElementById('dark-theme');
+        const backBtn = document.getElementById('back-btn');
+        const diseaseBtns = document.querySelectorAll('[data-disease]');
+        const dietBtns = document.querySelectorAll('[data-diet]');
+        const root = document.documentElement;
+
+        // فتح/إغلاق نافذة السمة
+        profileImg.addEventListener('click', function (e) {
+            e.stopPropagation();
+            themeModal.classList.toggle('active');
+        });
+
+        // إغلاق النافذة عند النقر خارجها
+        document.addEventListener('click', function (e) {
+            if (!themeModal.contains(e.target) && !profileImg.contains(e.target)) {
+                themeModal.classList.remove('active');
+            }
+        });
+
+        // تغيير السمة إلى اللونية الزاهية
+        colorTheme.addEventListener('click', function () {
+            document.body.classList.remove('dark-theme');
+            root.classList.remove('dark-theme');
+            colorTheme.classList.add('active');
+            darkTheme.classList.remove('active');
+            themeModal.classList.remove('active');
+
+            // حفظ التفضيل في localStorage
+            localStorage.setItem('wellcare-theme', 'light');
+        });
+
+        // تغيير السمة إلى اللونية الغامقة
+        darkTheme.addEventListener('click', function () {
+            document.body.classList.add('dark-theme');
+            root.classList.add('dark-theme');
+            darkTheme.classList.add('active');
+            colorTheme.classList.remove('active');
+            themeModal.classList.remove('active');
+
+            // حفظ التفضيل في localStorage
+            localStorage.setItem('wellcare-theme', 'dark');
+        });
+
+        // زر العودة للصفحة الرئيسية
+        backBtn.addEventListener('click', function () {
+            // في تطبيق حقيقي، هذا سيوجه إلى الصفحة الرئيسية
+            // window.location.href = "index.html";
+
+            // لأغراض العرض، سنظهر رسالة
+            alert('سيتم توجيهك إلى الصفحة الرئيسية. في التطبيق الحقيقي، سيعود بك إلى الصفحة الرئيسية.');
+        });
+
+        // أزرار الأمراض
+        diseaseBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const disease = this.getAttribute('data-disease');
+                const diseaseInfo = {
+                    'diabetes': {
+                        title: 'السكري',
+                        prevention: 'الوقاية من السكري تشمل: الحفاظ على وزن صحي، ممارسة الرياضة بانتظام، تناول نظام غذائي متوازن، تجنب السكريات المضافة، والفحص الدوري لمستوى السكر في الدم.'
+                    },
+                    'hypertension': {
+                        title: 'ارتفاع ضغط الدم',
+                        prevention: 'الوقاية من ارتفاع ضغط الدم تشمل: تقليل استهلاك الملح، الحفاظ على وزن صحي، ممارسة الرياضة بانتظام، تقليل استهلاك الكحول، وإدارة التوتر.'
+                    },
+                    'heart': {
+                        title: 'أمراض القلب',
+                        prevention: 'الوقاية من أمراض القلب تشمل: الإقلاع عن التدخين، الحفاظ على ضغط الدم الطبيعي، التحكم بمستوى الكوليسترول، ممارسة الرياضة، وتناول غذاء صحي للقلب.'
+                    },
+                    'obesity': {
+                        title: 'السمنة',
+                        prevention: 'الوقاية من السمنة تشمل: موازنة السعرات الحرارية المستهلكة مع المصروفة، تناول الفواكه والخضروات، الحد من الأطعمة عالية الدهون والسكر، وممارسة النشاط البدني بانتظام.'
+                    },
+                    'respiratory': {
+                        title: 'أمراض الجهاز التنفسي',
+                        prevention: 'الوقاية من أمراض الجهاز التنفسي تشمل: الإقلاع عن التدخين، تجنب الملوثات الهوائية، الحصول على التطعيمات المناسبة، ممارسة تمارين التنفس، والحفاظ على نظافة اليدين.'
+                    }
+                };
+
+                const info = diseaseInfo[disease];
+                alert(`طرق الوقاية من ${info.title}:\n\n${info.prevention}`);
+            });
+        });
+
+        // أزرار الأنظمة الغذائية
+        dietBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const diet = this.getAttribute('data-diet');
+                const dietInfo = {
+                    'keto': {
+                        title: 'نظام الكيتو',
+                        description: 'نظام غذائي منخفض الكربوهيدرات وعالي الدهون. يشمل: اللحوم، الأسماك الدهنية، البيض، الزبدة، الزيوت الصحية، المكسرات، والأفوكادو.'
+                    },
+                    'mediterranean': {
+                        title: 'النظام المتوسطي',
+                        description: 'يركز على: الفواكه والخضروات، الحبوب الكاملة، البقوليات، المكسرات، زيت الزيتون، الأسماك، والدواجن مع تقليل اللحوم الحمراء.'
+                    },
+                    'dash': {
+                        title: 'نظام DASH',
+                        description: 'مصمم لخفض ضغط الدم. يشمل: الفواكه، الخضروات، الحبوب الكاملة، البروتينات قليلة الدسم، ومنتجات الألبان قليلة الدسم مع تقليل الصوديوم.'
+                    },
+                    'vegan': {
+                        title: 'النظام النباتي',
+                        description: 'يعتمد على الأطعمة النباتية فقط: الفواكه، الخضروات، الحبوب الكاملة، البقوليات، المكسرات، والبذور. يستبعد جميع المنتجات الحيوانية.'
+                    }
+                };
+
+                const info = dietInfo[diet];
+                alert(`${info.title}:\n\n${info.description}`);
+            });
+        });
+
+        // إضافة تأثير عند تحميل الصفحة
+        window.addEventListener('load', function () {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+
+            // تحميل تفضيل السمة من localStorage
+            const savedTheme = localStorage.getItem('wellcare-theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                root.classList.add('dark-theme');
+                colorTheme.classList.remove('active');
+                darkTheme.classList.add('active');
+            }
+
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+
+            // إضافة تأثيرات للبطاقات عند التمرير
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // تطبيق تأثيرات على البطاقات
+            const cards = document.querySelectorAll('.disease-card, .diet-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.transitionDelay = `${index * 0.1}s`;
+
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+
+</html>
