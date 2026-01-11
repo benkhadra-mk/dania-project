@@ -79,6 +79,24 @@ $username = $isLoggedIn ? getUsername() : 'user';
             color: #FFD700;
         }
         
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+        
+        nav a:hover {
+            color: #FFD700;
+        }
+        
         .user-area {
             display: flex;
             align-items: center;
@@ -92,6 +110,12 @@ $username = $isLoggedIn ? getUsername() : 'user';
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
         }
 
         .logout-btn {
@@ -102,6 +126,41 @@ $username = $isLoggedIn ? getUsername() : 'user';
             border-radius: 50px;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+        
+        /* Logo Center Section */
+        .logo-center {
+            text-align: center;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-center i {
+            font-size: 5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .logo-center h1 {
+            font-size: 3.5rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo-center h1 span {
+            color: var(--secondary);
+        }
+        
+        .logo-center p {
+            font-size: 1.3rem;
+            color: var(--gray);
         }
         
         main {
@@ -141,6 +200,12 @@ $username = $isLoggedIn ? getUsername() : 'user';
             padding: 1rem 2.5rem;
             border-radius: 50px;
             text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(46, 139, 87, 0.4);
         }
         
         .services {
@@ -155,6 +220,13 @@ $username = $isLoggedIn ? getUsername() : 'user';
             padding: 2rem;
             box-shadow: var(--shadow);
             text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
         
         .service-icon {
@@ -195,6 +267,12 @@ $username = $isLoggedIn ? getUsername() : 'user';
                 <h1>Well<span>Care</span></h1>
             </div>
             
+            <nav>
+                <a href="index.php"><i class="fas fa-home"></i> الصفحة الرئيسية</a>
+                <a href="about.php"><i class="fas fa-info-circle"></i> من نحن</a>
+                <a href="contact.php"><i class="fas fa-envelope"></i> تواصل معنا</a>
+            </nav>
+            
             <div class="user-area">
                 <?php if ($isLoggedIn): ?>
                     <?php if (isAdmin()): ?>
@@ -219,6 +297,13 @@ $username = $isLoggedIn ? getUsername() : 'user';
     </header>
     
     <main>
+        <!-- Centered Logo Section -->
+        <div class="logo-center">
+            <i class="fas fa-heartbeat"></i>
+            <h1>Well<span>Care</span></h1>
+            <p>موقع الرعاية الصحية</p>
+        </div>
+        
         <section class="hero">
             <h2>ابدأ رحلتك الصحية مع WellCare</h2>
             <p>نقدم لك أفضل خدمات الرعاية الصحية والاستشارات الطبية عبر الإنترنت</p>
