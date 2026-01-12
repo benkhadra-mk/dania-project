@@ -12,7 +12,7 @@ require_once 'utils/security.php';
 $slug = getQuery('slug', '');
 
 if (empty($slug)) {
-    header('Location: health-journey.html');
+    header('Location: health-journey.php');
     exit();
 }
 
@@ -25,7 +25,7 @@ $stmt->execute([$slug]);
 $content = $stmt->fetch();
 
 if (!$content) {
-    header('Location: health-journey.html');
+    header('Location: health-journey.php');
     exit();
 }
 
@@ -354,7 +354,7 @@ $iconMap = [
 <body>
     <header>
         <div class="header-container">
-            <button class="header-back-btn" onclick="window.location.href='health-journey.html'">
+            <button class="header-back-btn" onclick="window.location.href='health-journey.php'">
                 <i class="fas fa-arrow-right"></i>
             </button>
             

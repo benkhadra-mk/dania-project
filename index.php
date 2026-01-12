@@ -308,7 +308,7 @@ $username = $isLoggedIn ? getUsername() : 'user';
             <h2>ابدأ رحلتك الصحية مع WellCare</h2>
             <p>نقدم لك أفضل خدمات الرعاية الصحية والاستشارات الطبية عبر الإنترنت</p>
             <?php if ($isLoggedIn): ?>
-                <a href="health-journey.html" class="cta-button">
+                <a href="health-journey.php" class="cta-button">
                     <i class="fas fa-play-circle"></i> ابدأ رحلتك الصحية
                 </a>
             <?php else: ?>

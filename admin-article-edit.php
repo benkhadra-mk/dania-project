@@ -213,6 +213,160 @@ if ($isEdit) {
             text-decoration: none;
             display: inline-block;
         }
+        
+        /* Icon Picker Styles */
+        .icon-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .icon-picker-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .icon-picker-btn:hover {
+            background: #3a7bc8;
+            transform: translateY(-2px);
+        }
+        
+        .selected-icon-preview {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            background: var(--light);
+            border-radius: 8px;
+            min-width: 150px;
+        }
+        
+        .selected-icon-preview i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .selected-icon-preview span {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Icon Modal */
+        .icon-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .icon-modal.active {
+            display: flex;
+        }
+        
+        .icon-modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .icon-modal-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .icon-modal-header h3 {
+            color: var(--primary);
+            margin: 0;
+        }
+        
+        .icon-modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--gray);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .icon-modal-close:hover {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .icon-grid {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 1rem;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+        
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .icon-item:hover {
+            border-color: var(--secondary);
+            background: rgba(74, 144, 226, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .icon-item.selected {
+            border-color: var(--primary);
+            background: rgba(46, 139, 87, 0.15);
+        }
+        
+        .icon-item i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .icon-item span {
+            font-size: 0.7rem;
+            color: var(--gray);
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -257,7 +411,19 @@ if ($isEdit) {
                     
                     <div class="form-group">
                         <label>الأيقونة (Font Awesome) *</label>
-                        <input type="text" id="icon" required placeholder="مثال: fa-syringe" value="<?php echo $isEdit ? htmlspecialchars($article['icon']) : ''; ?>">
+                        <div class="icon-picker-container">
+                            <button type="button" class="icon-picker-btn" id="iconPickerBtn">
+                                <i class="fas fa-icons"></i>
+                                <span>اختر أيقونة</span>
+                            </button>
+                            <div class="selected-icon-preview" id="iconPreview">
+                                <?php if ($isEdit && !empty($article['icon'])): ?>
+                                    <i class="fas <?php echo htmlspecialchars($article['icon']); ?>"></i>
+                                    <span><?php echo htmlspecialchars($article['icon']); ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <input type="hidden" id="icon" name="icon" required value="<?php echo $isEdit ? htmlspecialchars($article['icon']) : ''; ?>">
                     </div>
                 </div>
                 
@@ -349,7 +515,122 @@ if ($isEdit) {
         </form>
     </main>
     
+    <!-- Icon Picker Modal -->
+    <div class="icon-modal" id="iconModal">
+        <div class="icon-modal-content">
+            <div class="icon-modal-header">
+                <h3>اختر أيقونة</h3>
+                <button type="button" class="icon-modal-close" onclick="closeIconModal()">&times;</button>
+            </div>
+            <div class="icon-grid" id="iconGrid">
+                <!-- Icons will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    
     <script>
+        // Available health-related icons
+        const availableIcons = [
+            { class: 'fa-syringe', name: 'حقنة' },
+            { class: 'fa-heartbeat', name: 'نبض القلب' },
+            { class: 'fa-heart', name: 'قلب' },
+            { class: 'fa-stethoscope', name: 'سماعة' },
+            { class: 'fa-pills', name: 'حبوب' },
+            { class: 'fa-capsules', name: 'كبسولات' },
+            { class: 'fa-prescription-bottle', name: 'زجاجة دواء' },
+            { class: 'fa-lungs', name: 'رئتان' },
+            { class: 'fa-brain', name: 'دماغ' },
+            { class: 'fa-bone', name: 'عظم' },
+            { class: 'fa-tooth', name: 'سن' },
+            { class: 'fa-eye', name: 'عين' },
+            { class: 'fa-dna', name: 'DNA' },
+            { class: 'fa-apple-alt', name: 'تفاحة' },
+            { class: 'fa-carrot', name: 'جزر' },
+            { class: 'fa-leaf', name: 'ورقة' },
+            { class: 'fa-fish', name: 'سمك' },
+            { class: 'fa-bacon', name: 'لحم' },
+            { class: 'fa-cheese', name: 'جبن' },
+            { class: 'fa-drumstick-bite', name: 'دجاج' },
+            { class: 'fa-running', name: 'جري' },
+            { class: 'fa-dumbbell', name: 'أوزان' },
+            { class: 'fa-walking', name: 'مشي' },
+            { class: 'fa-biking', name: 'دراجة' },
+            { class: 'fa-medkit', name: 'حقيبة إسعاف' },
+            { class: 'fa-ambulance', name: 'إسعاف' },
+            { class: 'fa-hospital', name: 'مستشفى' },
+            { class: 'fa-user-md', name: 'طبيب' },
+            { class: 'fa-weight', name: 'وزن' },
+            { class: 'fa-plus-circle', name: 'إضافة' },
+            { class: 'fa-briefcase-medical', name: 'حقيبة طبية' },
+            { class: 'fa-first-aid', name: 'إسعافات' }
+        ];
+        
+        let selectedIcon = '<?php echo $isEdit ? htmlspecialchars($article['icon']) : ''; ?>';
+        
+        // Initialize icon grid
+        function initIconGrid() {
+            const iconGrid = document.getElementById('iconGrid');
+            iconGrid.innerHTML = '';
+            
+            availableIcons.forEach(icon => {
+                const iconItem = document.createElement('div');
+                iconItem.className = 'icon-item';
+                if (selectedIcon === icon.class) {
+                    iconItem.classList.add('selected');
+                }
+                
+                iconItem.innerHTML = `
+                    <i class="fas ${icon.class}"></i>
+                    <span>${icon.name}</span>
+                `;
+                
+                iconItem.addEventListener('click', () => selectIcon(icon.class, icon.name));
+                iconGrid.appendChild(iconItem);
+            });
+        }
+        
+        // Open icon modal
+        document.getElementById('iconPickerBtn').addEventListener('click', () => {
+            initIconGrid();
+            document.getElementById('iconModal').classList.add('active');
+        });
+        
+        // Close icon modal
+        function closeIconModal() {
+            document.getElementById('iconModal').classList.remove('active');
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('iconModal').addEventListener('click', (e) => {
+            if (e.target.id === 'iconModal') {
+                closeIconModal();
+            }
+        });
+        
+        // Select icon
+        function selectIcon(iconClass, iconName) {
+            selectedIcon = iconClass;
+            
+            // Update hidden input
+            document.getElementById('icon').value = iconClass;
+            
+            // Update preview
+            const preview = document.getElementById('iconPreview');
+            preview.innerHTML = `
+                <i class="fas ${iconClass}"></i>
+                <span>${iconClass}</span>
+            `;
+            
+            // Update grid selection
+            document.querySelectorAll('.icon-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.target.closest('.icon-item').classList.add('selected');
+            
+            // Close modal
+            setTimeout(() => closeIconModal(), 300);
+        }
+        
         function addListItem(containerId, className) {
             const container = document.getElementById(containerId);
             const div = document.createElement('div');
