@@ -1,7 +1,7 @@
 <?php
 /**
  * Admin Dashboard - WellCare
- * Article and Comment Management
+ * Article, Comment, and Contact Inquiry Management
  */
 
 require_once 'config/session.php';
@@ -27,6 +27,9 @@ $commentCount = $stmt->fetch()['count'];
 $stmt = $db->query("SELECT COUNT(*) as count FROM likes");
 $likeCount = $stmt->fetch()['count'];
 
+$stmt = $db->query("SELECT COUNT(*) as count FROM contact_inquiries WHERE status = 'pending'");
+$inquiryCount = $stmt->fetch()['count'];
+
 // Get all articles
 $stmt = $db->query("SELECT * FROM health_content ORDER BY created_at DESC");
 $articles = $stmt->fetchAll();
@@ -41,6 +44,19 @@ $stmt = $db->query("
     LIMIT 10
 ");
 $recentComments = $stmt->fetchAll();
+
+// Get contact inquiries
+$stmt = $db->query("
+    SELECT * FROM contact_inquiries 
+    ORDER BY 
+        CASE status 
+            WHEN 'pending' THEN 1 
+            WHEN 'read' THEN 2 
+            WHEN 'resolved' THEN 3 
+        END,
+        created_at DESC
+");
+$inquiries = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -154,7 +170,7 @@ $recentComments = $stmt->fetchAll();
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 3rem;
         }
@@ -265,6 +281,21 @@ $recentComments = $stmt->fetchAll();
             color: #7b1fa2;
         }
         
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-read {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-resolved {
+            background: #d4edda;
+            color: #155724;
+        }
+        
         .action-buttons {
             display: flex;
             gap: 0.5rem;
@@ -277,6 +308,8 @@ $recentComments = $stmt->fetchAll();
             border: none;
             cursor: pointer;
             font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
         }
         
         .btn-edit {
@@ -289,11 +322,11 @@ $recentComments = $stmt->fetchAll();
             color: white;
         }
         
-        .comment-text {
+        .comment-text, .inquiry-message {
             max-width: 300px;
+            max-height: 60px;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
         }
     </style>
 </head>
@@ -355,6 +388,67 @@ $recentComments = $stmt->fetchAll();
                 <div class="stat-number"><?php echo $likeCount; ?></div>
                 <div class="stat-label">الإعجابات</div>
             </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="stat-number"><?php echo $inquiryCount; ?></div>
+                <div class="stat-label">الاستفسارات المعلقة</div>
+            </div>
+        </div>
+        
+        <!-- Contact Inquiries Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-envelope-open-text"></i> استفسارات العملاء</h2>
+            </div>
+            
+            <?php if (empty($inquiries)): ?>
+                <p style="text-align: center; color: var(--gray); padding: 2rem;">لا توجد استفسارات حالياً</p>
+            <?php else: ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>الموضوع</th>
+                        <th>الرسالة</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($inquiries as $inquiry): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($inquiry['name']); ?></td>
+                        <td><a href="mailto:<?php echo htmlspecialchars($inquiry['email']); ?>"><?php echo htmlspecialchars($inquiry['email']); ?></a></td>
+                        <td><?php echo htmlspecialchars($inquiry['subject']); ?></td>
+                        <td class="inquiry-message" title="<?php echo htmlspecialchars($inquiry['message']); ?>">
+                            <?php echo htmlspecialchars($inquiry['message']); ?>
+                        </td>
+                        <td>
+                            <select class="badge badge-<?php echo $inquiry['status']; ?>" 
+                                    onchange="updateInquiryStatus(<?php echo $inquiry['id']; ?>, this.value)"
+                                    style="border: none; cursor: pointer;">
+                                <option value="pending" <?php echo $inquiry['status'] === 'pending' ? 'selected' : ''; ?>>معلق</option>
+                                <option value="read" <?php echo $inquiry['status'] === 'read' ? 'selected' : ''; ?>>مقروء</option>
+                                <option value="resolved" <?php echo $inquiry['status'] === 'resolved' ? 'selected' : ''; ?>>تم الحل</option>
+                            </select>
+                        </td>
+                        <td><?php echo date('Y-m-d H:i', strtotime($inquiry['created_at'])); ?></td>
+                        <td>
+                            <a href="mailto:<?php echo htmlspecialchars($inquiry['email']); ?>?subject=Re: <?php echo urlencode($inquiry['subject']); ?>" 
+                               class="btn-sm btn-edit">
+                                <i class="fas fa-reply"></i> رد
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php endif; ?>
         </div>
         
         <!-- Articles Section -->
@@ -496,6 +590,26 @@ $recentComments = $stmt->fetchAll();
                 }
             } catch (error) {
                 alert('حدث خطأ أثناء الحذف');
+            }
+        }
+        
+        async function updateInquiryStatus(id, status) {
+            try {
+                const response = await fetch('/dania-project/api/admin/update-inquiry-status.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id, status})
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                alert('حدث خطأ أثناء تحديث الحالة');
             }
         }
     </script>

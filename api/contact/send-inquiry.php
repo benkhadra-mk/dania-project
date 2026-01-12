@@ -7,6 +7,7 @@
 header('Content-Type: application/json; charset=utf-8');
 
 require_once '../../utils/security.php';
+require_once '../../config/database.php';
 
 // Only allow POST requests
 if (!isPostRequest()) {
@@ -47,40 +48,26 @@ try {
         jsonError('الرسالة يجب أن تكون بين 10 و 1000 حرف');
     }
     
-    // In a real application, you would:
-    // 1. Store in database
-    // 2. Send email to admin
-    // 3. Send confirmation email to user
+    // Save to database
+    $db = getDB();
     
-    // For now, we'll just log it and return success
-    $inquiry = [
-        'name' => $name,
-        'email' => $email,
-        'subject' => $subject,
-        'message' => $message,
-        'date' => date('Y-m-d H:i:s'),
-        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
-    ];
+    $stmt = $db->prepare("
+        INSERT INTO contact_inquiries (name, email, subject, message, status, created_at)
+        VALUES (?, ?, ?, ?, 'pending', NOW())
+    ");
     
-    // Log to file (in production, store in database)
-    $logFile = '../../logs/inquiries.log';
-    $logDir = dirname($logFile);
+    $stmt->execute([$name, $email, $subject, $message]);
     
-    if (!file_exists($logDir)) {
-        mkdir($logDir, 0755, true);
-    }
-    
-    file_put_contents(
-        $logFile,
-        json_encode($inquiry, JSON_UNESCAPED_UNICODE) . "\n",
-        FILE_APPEND
-    );
+    $inquiryId = $db->lastInsertId();
     
     jsonSuccess(
-        ['inquiry_id' => uniqid()],
+        ['inquiry_id' => $inquiryId],
         'تم إرسال استفسارك بنجاح! سنتواصل معك قريباً عبر البريد الإلكتروني.'
     );
     
+} catch (PDOException $e) {
+    error_log("Database error in contact inquiry: " . $e->getMessage());
+    jsonError('حدث خطأ أثناء حفظ الاستفسار', 500);
 } catch (Exception $e) {
     error_log("Contact inquiry error: " . $e->getMessage());
     jsonError('حدث خطأ غير متوقع', 500);
